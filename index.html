@@ -1569,7 +1569,7 @@ var BROCHURE_URL='quote-generator/templates/brochure.pdf';
 
 // Catalogue — keep in sync with quote-generator/generate_quote.py
 var PDF_PRODUCTS={
-  zebra:['Zebra Blinds',190,290,'Alternating sheer and solid fabric bands for elegant, adjustable light control.'],
+  zebra:['Zebra Blinds',180,280,'Alternating sheer and solid fabric bands for elegant, adjustable light control.'],
   roller:['Roller Shades',160,260,'Clean, minimal look in light-filtering, blackout, and solar screen fabrics.'],
   roman:['Roman Shades',240,420,'Soft fabric folds that stack neatly when raised. Timeless, elegant look.'],
   drapery:['Custom Draperies',350,600,'Floor-to-ceiling custom draperies, fully lined, sewn to your exact dimensions.'],
@@ -1578,7 +1578,9 @@ var PDF_PRODUCTS={
   silhouette:['Silhouette Shades',250,450,'Soft fabric vanes float between sheers for diffused light and UV protection.'],
   cellular:['Cellular Shades',200,350,'Honeycomb cells trap air for excellent insulation and energy efficiency.']
 };
-var PDF_MOTOR=[200,200];
+var PDF_MOTOR=[200,350];
+var PDF_MOTOR_NAME='Somfy Motorized Upgrade';
+var PDF_MOTOR_DESC='Quiet Somfy motor, remote + Google Home / Alexa / Apple HomeKit.';
 // brand palette (matches the site)
 var C_NAVY=[20,20,20],C_GOLD=[201,168,76],C_GOLDD=[154,122,46],C_CREAM=[242,237,228],
     C_OFF=[247,245,240],C_GREY=[107,107,107],C_MUTED=[168,162,154],C_LINE=[230,225,214],C_WHITE=[255,255,255];
@@ -1640,25 +1642,22 @@ function buildQuotePage1(data){
   });
 
   // Compute rows + totals
-  // Range logic: cheapest = all windows in CHEAPEST product; priciest = all windows in PRICIEST product.
+  // Range logic: total = sum of every selected product (and motor) across all windows.
   var oversized=String(data.oversized||'').toLowerCase().indexOf('yes')===0;
   var rows=[];
-  var minLow=Infinity,maxHigh=0;
+  var lo=0,hi=0;
   prods.forEach(function(k){var p=PDF_PRODUCTS[k];
     rows.push([p[0],p[3],pdfMoney(p[1])+' – '+pdfMoney(p[2]),pdfMoney(p[1]*windows)+' – '+pdfMoney(p[2]*windows)]);
-    if(p[1]<minLow)minLow=p[1];
-    if(p[2]>maxHigh)maxHigh=p[2];
+    lo+=p[1]*windows;
+    hi+=p[2]*windows;
   });
-  var lo=minLow*windows, hi=maxHigh*windows;
-  if(motor){rows.push(['Motorized Upgrade','Quiet motor, remote + Google Home / Alexa / Apple HomeKit.',
-    pdfMoney(PDF_MOTOR[0]),pdfMoney(PDF_MOTOR[0]*windows)]);
-    lo+=PDF_MOTOR[0]*windows;hi+=PDF_MOTOR[0]*windows;}
+  if(motor){rows.push([PDF_MOTOR_NAME,PDF_MOTOR_DESC,
+    pdfMoney(PDF_MOTOR[0])+' – '+pdfMoney(PDF_MOTOR[1]),pdfMoney(PDF_MOTOR[0]*windows)+' – '+pdfMoney(PDF_MOTOR[1]*windows)]);
+    lo+=PDF_MOTOR[0]*windows;hi+=PDF_MOTOR[1]*windows;}
   if(oversized){lo=Math.round(lo*1.35);hi=Math.round(hi*1.35);}  // oversized +35%
   lo=Math.round(lo/10)*10;hi=Math.round(hi/10)*10;               // round to nearest $10
-  // Installation line only shows for 6 or more windows
-  if(windows>=6){
-    rows.push(['INSTALLATION','Professional measurement + installation included in all prices above.','INCLUDED','INCLUDED']);
-  }
+  // Professional measurement + installation are always included.
+  rows.push(['INSTALLATION','Professional measurement + installation included in all prices above.','INCLUDED','INCLUDED']);
 
   // Estimate band
   var by=doc.lastAutoTable.finalY+16,bandH=64,lw=cw*0.34;
@@ -1669,7 +1668,7 @@ function buildQuotePage1(data){
   doc.setTextColor.apply(doc,C_NAVY);doc.setFont('helvetica','bold');doc.setFontSize(9);
   doc.text('ESTIMATED INVESTMENT',mx,by+18);
   doc.setTextColor.apply(doc,C_GREY);doc.setFont('helvetica','normal');doc.setFontSize(8);
-  doc.text((windows>=6?'Fully installed · measurement, product & labour included':'Measurement & product included')+(motor?' · Motorized':''),mx,by+32);
+  doc.text('Fully installed · measurement, product & labour included'+(motor?' · Somfy motorized':''),mx,by+32);
   doc.text('Final pricing confirmed after your free in-home measurement.',mx,by+44);
   var btnW=cw*0.22,btnX=ML+cw-btnW,btnH=38,btnY=by+(bandH-btnH)/2;
   doc.setFillColor.apply(doc,C_GOLD);doc.roundedRect(btnX,btnY,btnW,btnH,4,4,'F');
