@@ -1654,24 +1654,21 @@ function buildQuotePage1(data){
   // Each product carries its own per-window price range; the breakdown lists one
   // line per selected product, plus the flat motorized upgrade if chosen.
   function rng(a,b){return a===b?pdfMoney(a):pdfMoney(a)+' – '+pdfMoney(b);}
+  function r5(n){return Math.round(n/5)*5;}
   var condo=String(data.home_type||'').toLowerCase().indexOf('condo')===0;
   var oversized=String(data.oversized||'').toLowerCase().indexOf('yes')===0;
+  // Condo (+10%) and taller (+15%) are baked silently into each item's price — no separate line.
+  var mult=(condo?1.10:1)*(oversized?1.15:1);
   var rows=[];
   // Total range = cheapest selected product → priciest selected product (× windows),
   // NOT the sum of every product (a window only gets one treatment).
   var minLo=Infinity,maxHi=0;
   prods.forEach(function(k){var p=PDF_PRODUCTS[k];
-    rows.push([p[0],p[3],rng(p[1],p[2]),rng(p[1]*windows,p[2]*windows)]);
-    if(p[1]<minLo)minLo=p[1];if(p[2]>maxHi)maxHi=p[2];
+    var plo=r5(p[1]*mult),phi=r5(p[2]*mult);
+    rows.push([p[0],p[3],rng(plo,phi),rng(plo*windows,phi*windows)]);
+    if(plo<minLo)minLo=plo;if(phi>maxHi)maxHi=phi;
   });
   var lo=(prods.length?minLo:0)*windows,hi=maxHi*windows;
-  // Surcharges are shown as their own line items so the ESTIMATED TOTAL visibly adds up.
-  if(condo){var cl=lo*0.10,ch=hi*0.10;                            // condo +10%
-    rows.push(['Condo Adjustment','Surcharge for condo/high-rise installations.','+10%',rng(Math.round(cl),Math.round(ch))]);
-    lo+=cl;hi+=ch;}
-  if(oversized){var tl=lo*0.15,th=hi*0.15;                        // taller +15%
-    rows.push(['Taller Windows','Surcharge for windows over 8 ft tall.','+15%',rng(Math.round(tl),Math.round(th))]);
-    lo+=tl;hi+=th;}
   if(motor){rows.push([PDF_MOTOR_NAME,PDF_MOTOR_DESC,
     rng(PDF_MOTOR[0],PDF_MOTOR[1]),rng(PDF_MOTOR[0]*windows,PDF_MOTOR[1]*windows)]);
     lo+=PDF_MOTOR[0]*windows;hi+=PDF_MOTOR[1]*windows;}
