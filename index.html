@@ -1665,8 +1665,13 @@ function buildQuotePage1(data){
     if(p[1]<minLo)minLo=p[1];if(p[2]>maxHi)maxHi=p[2];
   });
   var lo=(prods.length?minLo:0)*windows,hi=maxHi*windows;
-  if(condo){lo*=1.10;hi*=1.10;}        // condo +10% per item
-  if(oversized){lo*=1.15;hi*=1.15;}    // taller +15% per item
+  // Surcharges are shown as their own line items so the ESTIMATED TOTAL visibly adds up.
+  if(condo){var cl=lo*0.10,ch=hi*0.10;                            // condo +10%
+    rows.push(['Condo Adjustment','Surcharge for condo/high-rise installations.','+10%',rng(Math.round(cl),Math.round(ch))]);
+    lo+=cl;hi+=ch;}
+  if(oversized){var tl=lo*0.15,th=hi*0.15;                        // taller +15%
+    rows.push(['Taller Windows','Surcharge for windows over 8 ft tall.','+15%',rng(Math.round(tl),Math.round(th))]);
+    lo+=tl;hi+=th;}
   if(motor){rows.push([PDF_MOTOR_NAME,PDF_MOTOR_DESC,
     rng(PDF_MOTOR[0],PDF_MOTOR[1]),rng(PDF_MOTOR[0]*windows,PDF_MOTOR[1]*windows)]);
     lo+=PDF_MOTOR[0]*windows;hi+=PDF_MOTOR[1]*windows;}
