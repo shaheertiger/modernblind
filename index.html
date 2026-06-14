@@ -1652,7 +1652,7 @@ function buildQuotePage1(data){
   // Compute rows + totals
   // Pricing is presented in three named per-window slabs spanning $160–$500.
   // Each selected product is placed in the tier its average price falls into.
-  var TIERS=[{n:'Essential',lo:160,hi:250},{n:'Premium',lo:250,hi:375},{n:'Luxury',lo:375,hi:500}];
+  var TIERS=[{n:'Essential',lo:160,hi:250},{n:'Premium',lo:250,hi:350},{n:'Luxury',lo:350,hi:500}];
   function tierFor(p){var avg=(p[1]+p[2])/2;
     for(var i=0;i<TIERS.length;i++){if(avg<=TIERS[i].hi||i===TIERS.length-1)return TIERS[i];}}
   var oversized=String(data.oversized||'').toLowerCase().indexOf('yes')===0;
