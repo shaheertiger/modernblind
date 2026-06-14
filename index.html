@@ -1625,13 +1625,21 @@ function buildQuotePage1(data){
   var nx=px+doc.getTextWidth(name),tail=[];
   if(data.email)tail.push(data.email);
   if(data.phone)tail.push(data.phone);
+  var gridStart=118;
   if(tail.length){doc.setFont('helvetica','normal');doc.setTextColor.apply(doc,C_GREY);
-    doc.text('   ·   '+tail.join('   ·   '),nx,y);}
+    var inlineTail='   ·   '+tail.join('   ·   ');
+    if(nx+doc.getTextWidth(inlineTail)<=ML+cw){
+      doc.text(inlineTail,nx,y);                 // fits on the same line
+    }else{
+      doc.text(tail.join('   ·   '),ML,y+13);    // wrap contacts below to avoid running off-page
+      gridStart=130;
+    }
+  }
 
   // Details grid
   var label={fillColor:C_CREAM,fontStyle:'bold',textColor:C_NAVY};
   doc.autoTable({
-    startY:118,margin:{left:ML,right:ML},theme:'grid',
+    startY:gridStart,margin:{left:ML,right:ML},theme:'grid',
     styles:{fontSize:8.5,cellPadding:6,lineColor:C_LINE,lineWidth:0.6,valign:'middle',textColor:C_GREY},
     columnStyles:{0:{cellWidth:cw*0.20},1:{cellWidth:cw*0.30},2:{cellWidth:cw*0.20},3:{cellWidth:cw*0.30}},
     body:[
@@ -1642,14 +1650,20 @@ function buildQuotePage1(data){
   });
 
   // Compute rows + totals
-  // Range logic: total = sum of every selected product (and motor) across all windows.
+  // Pricing is presented in three named per-window slabs spanning $160–$500.
+  // Each selected product is placed in the tier its average price falls into.
+  var TIERS=[{n:'Essential',lo:160,hi:250},{n:'Premium',lo:250,hi:375},{n:'Luxury',lo:375,hi:500}];
+  function tierFor(p){var avg=(p[1]+p[2])/2;
+    for(var i=0;i<TIERS.length;i++){if(avg<=TIERS[i].hi||i===TIERS.length-1)return TIERS[i];}}
   var oversized=String(data.oversized||'').toLowerCase().indexOf('yes')===0;
   var rows=[];
   var lo=0,hi=0;
-  prods.forEach(function(k){var p=PDF_PRODUCTS[k];
-    rows.push([p[0],p[3],pdfMoney(p[1])+' – '+pdfMoney(p[2]),pdfMoney(p[1]*windows)+' – '+pdfMoney(p[2]*windows)]);
-    lo+=p[1]*windows;
-    hi+=p[2]*windows;
+  prods.forEach(function(k){var p=PDF_PRODUCTS[k];var t=tierFor(p);
+    rows.push([p[0],t.n+' tier · '+p[3],
+      pdfMoney(t.lo)+' – '+pdfMoney(t.hi),
+      pdfMoney(t.lo*windows)+' – '+pdfMoney(t.hi*windows)]);
+    lo+=t.lo*windows;
+    hi+=t.hi*windows;
   });
   if(motor){rows.push([PDF_MOTOR_NAME,PDF_MOTOR_DESC,
     pdfMoney(PDF_MOTOR[0])+' – '+pdfMoney(PDF_MOTOR[1]),pdfMoney(PDF_MOTOR[0]*windows)+' – '+pdfMoney(PDF_MOTOR[1]*windows)]);
@@ -1704,7 +1718,7 @@ function buildQuotePage1(data){
     footStyles:{fillColor:C_GOLD,textColor:C_NAVY,fontStyle:'bold'},
     columnStyles:{0:{cellWidth:cw*0.20,fontStyle:'bold'},1:{cellWidth:cw*0.42,textColor:C_GREY},
                   2:{cellWidth:cw*0.18,halign:'center'},3:{cellWidth:cw*0.20,halign:'center',fontStyle:'bold'}},
-    head:[['Product','Description','Per Window (avg)','Total (× '+windows+')']],
+    head:[['Product','Tier & Description','Per Window','Total (× '+windows+')']],
     body:rows,
     foot:[[{content:'ESTIMATED TOTAL',colSpan:3,styles:{halign:'left'}},pdfMoney(lo)+' – '+pdfMoney(hi)]],
     didParseCell:function(d){
@@ -1719,7 +1733,7 @@ function buildQuotePage1(data){
   doc.text('* Estimates based on standard sizing. Final pricing confirmed after free in-home measurement. HST not included.',ML,fy);
   doc.text('† For addresses outside our primary service area, additional travel charges may apply.',ML,fy+11);
   var ds=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'2-digit'});
-  doc.setFont('helvetica','normal');doc.text('Quote prepared '+ds+' · Call 647-673-1847',W-ML,fy+11,{align:'right'});
+  doc.setFont('helvetica','normal');doc.text('Quote prepared '+ds+' · Call 647-673-1847',W-ML,fy+22,{align:'right'});
 
   return doc.output('arraybuffer');
 }
