@@ -1,0 +1,15 @@
+{
+  "name": "Modern Home Blinds",
+  "short_name": "MH Blinds",
+  "description": "Custom blinds and window coverings manufactured in Oakville and installed across the GTA.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#0f0f0f",
+  "lang": "en-CA",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/assets/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
