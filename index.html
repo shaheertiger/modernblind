@@ -1650,21 +1650,28 @@ function buildQuotePage1(data){
   });
 
   // Compute rows + totals
-  // Pricing is presented in three named per-window slabs spanning $160–$500.
-  // Each selected product is placed in the tier its average price falls into.
-  var TIERS=[{n:'Essential',lo:160,hi:250},{n:'Premium',lo:250,hi:350},{n:'Luxury',lo:350,hi:500}];
+  // Pricing is presented as three named per-window slabs spanning $160–$500.
+  // ALL three slabs are shown so the customer sees every option (good / better / best).
+  var TIERS=[
+    {n:'Essential',lo:160,hi:250,d:'Quality everyday fabrics and core styles — great value.'},
+    {n:'Premium',lo:250,hi:350,d:'Upgraded fabrics, finishes and a wider selection.'},
+    {n:'Luxury',lo:350,hi:500,d:'Top-tier materials, specialty styles and premium finishes.'}
+  ];
   function tierFor(p){var avg=(p[1]+p[2])/2;
     for(var i=0;i<TIERS.length;i++){if(avg<=TIERS[i].hi||i===TIERS.length-1)return TIERS[i];}}
   var oversized=String(data.oversized||'').toLowerCase().indexOf('yes')===0;
+  // Map the customer's selected products onto the slab(s) they fall into.
+  var picks={};
+  prods.forEach(function(k){var t=tierFor(PDF_PRODUCTS[k]);
+    (picks[t.n]=picks[t.n]||[]).push(PDF_PRODUCTS[k][0]);});
   var rows=[];
-  var lo=0,hi=0;
-  prods.forEach(function(k){var p=PDF_PRODUCTS[k];var t=tierFor(p);
-    rows.push([p[0],t.n+' tier · '+p[3],
+  TIERS.forEach(function(t){var sel=picks[t.n];
+    rows.push([t.n,(sel?'Your selection: '+sel.join(', ')+'  ·  ':'')+t.d,
       pdfMoney(t.lo)+' – '+pdfMoney(t.hi),
       pdfMoney(t.lo*windows)+' – '+pdfMoney(t.hi*windows)]);
-    lo+=t.lo*windows;
-    hi+=t.hi*windows;
   });
+  // Headline range spans the full slab spectrum (Essential low → Luxury high).
+  var lo=TIERS[0].lo*windows,hi=TIERS[TIERS.length-1].hi*windows;
   if(motor){rows.push([PDF_MOTOR_NAME,PDF_MOTOR_DESC,
     pdfMoney(PDF_MOTOR[0])+' – '+pdfMoney(PDF_MOTOR[1]),pdfMoney(PDF_MOTOR[0]*windows)+' – '+pdfMoney(PDF_MOTOR[1]*windows)]);
     lo+=PDF_MOTOR[0]*windows;hi+=PDF_MOTOR[1]*windows;}
@@ -1710,7 +1717,7 @@ function buildQuotePage1(data){
   // Cost breakdown
   var ly=by+bandH+24;
   doc.setTextColor.apply(doc,C_GOLDD);doc.setFont('helvetica','bold');doc.setFontSize(10);
-  doc.text('COST BREAKDOWN — PER WINDOW',ML,ly);
+  doc.text('PRICING OPTIONS — PER WINDOW',ML,ly);
   doc.autoTable({
     startY:ly+8,margin:{left:ML,right:ML},theme:'grid',
     styles:{fontSize:8.5,cellPadding:6,lineColor:C_LINE,lineWidth:0.5,valign:'middle',textColor:C_NAVY},
@@ -1718,12 +1725,16 @@ function buildQuotePage1(data){
     footStyles:{fillColor:C_GOLD,textColor:C_NAVY,fontStyle:'bold'},
     columnStyles:{0:{cellWidth:cw*0.20,fontStyle:'bold'},1:{cellWidth:cw*0.42,textColor:C_GREY},
                   2:{cellWidth:cw*0.18,halign:'center'},3:{cellWidth:cw*0.20,halign:'center',fontStyle:'bold'}},
-    head:[['Product','Tier & Description','Per Window','Total (× '+windows+')']],
+    head:[['Tier','Description','Per Window','Total (× '+windows+')']],
     body:rows,
     foot:[[{content:'ESTIMATED TOTAL',colSpan:3,styles:{halign:'left'}},pdfMoney(lo)+' – '+pdfMoney(hi)]],
     didParseCell:function(d){
-      if(d.section==='body'&&typeof d.cell.raw==='string'&&d.cell.raw==='INCLUDED'){
-        d.cell.styles.textColor=C_GOLDD;d.cell.styles.fontStyle='bold';}
+      if(d.section==='body'){
+        var first=d.row.raw&&d.row.raw[0];
+        if(picks[first])d.cell.styles.fillColor=[250,246,235];  // tint the customer's chosen tier
+        if(typeof d.cell.raw==='string'&&d.cell.raw==='INCLUDED'){
+          d.cell.styles.textColor=C_GOLDD;d.cell.styles.fontStyle='bold';}
+      }
     }
   });
 
