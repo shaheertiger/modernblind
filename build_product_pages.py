@@ -23,6 +23,15 @@ SAME_AS = [
 # never goes stale on its own. Bump when you regenerate in a new year.
 PRICE_VALID_UNTIL = "2027-12-31"
 
+# ── Google review data for AggregateRating (rich-result stars) ───────────────
+# IMPORTANT: these must reflect REAL, verifiable Google reviews. Google can
+# issue a structured-data manual action for invented counts. The "10,000+
+# clients" figure is customers, NOT reviews — do not use it here.
+# Leave GOOGLE_REVIEW_COUNT = None to omit AggregateRating entirely (safe
+# default). Set it to the real review count (as a string) to switch stars on.
+GOOGLE_REVIEW_RATING = "5.0"
+GOOGLE_REVIEW_COUNT = None  # e.g. "87" — set to the real Google review count
+
 # ── Shared product catalogue (slug -> short name) for nav / related ──────────
 CATALOG = [
     ("zebra-blinds", "Zebra Blinds"),
@@ -747,6 +756,14 @@ def render(slug, p):
         "manufacturer": {"@id": ORG_ID},
         "areaServed": "Greater Toronto Area",
     }
+    if GOOGLE_REVIEW_COUNT:
+        product_node["aggregateRating"] = {
+            "@type": "AggregateRating",
+            "ratingValue": GOOGLE_REVIEW_RATING,
+            "reviewCount": GOOGLE_REVIEW_COUNT,
+            "bestRating": "5",
+            "worstRating": "1",
+        }
     if p.get("price"):
         lo, hi = p["price"]
         product_node["offers"] = {
