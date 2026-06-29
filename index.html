@@ -36,7 +36,7 @@
 <!-- Brand & catalog structured data (helps search + AI answer engines) -->
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Organization","@id":"https://www.modernhomeblinds.ca/#org","name":"Modern Home Blinds","url":"https://www.modernhomeblinds.ca/","logo":"https://www.modernhomeblinds.ca/assets/logo.png","image":"https://www.modernhomeblinds.ca/assets/logo.png","telephone":"+1-647-673-1847","areaServed":"Greater Toronto Area","sameAs":[]},
+{"@type":"Organization","@id":"https://www.modernhomeblinds.ca/#org","name":"Modern Home Blinds","url":"https://www.modernhomeblinds.ca/","logo":"https://www.modernhomeblinds.ca/assets/logo.png","image":"https://www.modernhomeblinds.ca/assets/logo.png","telephone":"+1-647-673-1847","email":"wahhab2020@gmail.com","areaServed":"Greater Toronto Area","sameAs":["https://www.facebook.com/profile.php?id=61571563192062","https://www.instagram.com/exaadecor/"]},
 {"@type":"WebSite","@id":"https://www.modernhomeblinds.ca/#website","url":"https://www.modernhomeblinds.ca/","name":"Modern Home Blinds","inLanguage":"en-CA","publisher":{"@id":"https://www.modernhomeblinds.ca/#org"}},
 {"@type":"Service","serviceType":"Custom window coverings","provider":{"@id":"https://www.modernhomeblinds.ca/#org"},"areaServed":"Greater Toronto Area","hasOfferCatalog":{"@type":"OfferCatalog","name":"Custom Blinds & Window Coverings","itemListElement":[
 {"@type":"Offer","priceCurrency":"CAD","priceSpecification":{"@type":"PriceSpecification","minPrice":"190","maxPrice":"250","priceCurrency":"CAD"},"itemOffered":{"@type":"Product","name":"Zebra Blinds","url":"https://www.modernhomeblinds.ca/zebra-blinds.html"}},
@@ -618,27 +618,49 @@ footer{background:#070707;color:rgba(255,255,255,.4);padding:64px 28px 28px}
 {
   "@context": "https://schema.org",
   "@type": "HomeAndConstructionBusiness",
+  "@id": "https://www.modernhomeblinds.ca/#org",
   "name": "Modern Home Blinds",
   "image": "https://www.modernhomeblinds.ca/assets/og-image.jpg",
+  "logo": "https://www.modernhomeblinds.ca/assets/logo.png",
   "url": "https://www.modernhomeblinds.ca/",
   "telephone": "+1-647-673-1847",
   "email": "wahhab2020@gmail.com",
   "priceRange": "$$",
+  "currenciesAccepted": "CAD",
+  "paymentAccepted": "Cash, Credit Card, Debit, E-transfer",
   "description": "Custom blinds and window coverings manufactured in Oakville, ON and installed across the Greater Toronto Area in under a week. Zebra blinds, roller shades, California shutters, motorized blinds and custom draperies.",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "2380 Wyecroft Rd, Unit 8",
     "addressLocality": "Oakville",
     "addressRegion": "ON",
+    "postalCode": "L6L 6W1",
     "addressCountry": "CA"
   },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 43.4097,
+    "longitude": -79.7124
+  },
+  "hasMap": "https://maps.google.com/?q=2380+Wyecroft+Rd+Unit+8+Oakville+ON",
   "areaServed": [
     "Oakville","Milton","Mississauga","Brampton","Burlington","Toronto",
     "North York","Etobicoke","Scarborough","Vaughan","Richmond Hill","Markham",
     "Newmarket","Barrie","Hamilton","Guelph","Waterloo","Kitchener","Cambridge"
   ],
   "openingHours": "Mo-Su 09:00-18:00",
-  "sameAs": []
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+      "opens": "09:00",
+      "closes": "18:00"
+    }
+  ],
+  "sameAs": [
+    "https://www.facebook.com/profile.php?id=61571563192062",
+    "https://www.instagram.com/exaadecor/"
+  ]
 }
 </script>
 <script type="application/ld+json">
