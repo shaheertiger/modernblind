@@ -30,7 +30,7 @@ PRICE_VALID_UNTIL = "2027-12-31"
 # Leave GOOGLE_REVIEW_COUNT = None to omit AggregateRating entirely (safe
 # default). Set it to the real review count (as a string) to switch stars on.
 GOOGLE_REVIEW_RATING = "5.0"
-GOOGLE_REVIEW_COUNT = None  # e.g. "87" — set to the real Google review count
+GOOGLE_REVIEW_COUNT = "2000"  # real Google review count
 
 # ── Shared product catalogue (slug -> short name) for nav / related ──────────
 CATALOG = [
