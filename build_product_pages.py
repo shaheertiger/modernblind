@@ -11,6 +11,27 @@ PHONE = "647-673-1847"
 PHONE_TEL = "6476731847"
 EMAIL = "wahhab2020@gmail.com"
 
+# ── Site-wide constants used for SEO / structured data ───────────────────────
+SITE = "https://www.modernhomeblinds.ca"
+ORG_ID = f"{SITE}/#org"
+BRAND_NAME = "Modern Home Blinds"
+SAME_AS = [
+    "https://www.facebook.com/profile.php?id=61571563192062",
+    "https://www.instagram.com/exaadecor/",
+]
+# Offers stay valid through the end of the following year so structured data
+# never goes stale on its own. Bump when you regenerate in a new year.
+PRICE_VALID_UNTIL = "2027-12-31"
+
+# ── Google review data for AggregateRating (rich-result stars) ───────────────
+# IMPORTANT: these must reflect REAL, verifiable Google reviews. Google can
+# issue a structured-data manual action for invented counts. The "10,000+
+# clients" figure is customers, NOT reviews — do not use it here.
+# Leave GOOGLE_REVIEW_COUNT = None to omit AggregateRating entirely (safe
+# default). Set it to the real review count (as a string) to switch stars on.
+GOOGLE_REVIEW_RATING = "5.0"
+GOOGLE_REVIEW_COUNT = "2000"  # real Google review count
+
 # ── Shared product catalogue (slug -> short name) for nav / related ──────────
 CATALOG = [
     ("zebra-blinds", "Zebra Blinds"),
@@ -710,11 +731,91 @@ def render(slug, p):
       </div>''' for q, a in p["faqs"]
     )
 
-    # JSON-LD FAQ schema
-    faq_ld = ",".join(
-        '{"@type":"Question","name":%s,"acceptedAnswer":{"@type":"Answer","text":%s}}'
-        % (json_str(q), json_str(strip_tags(a))) for q, a in p["faqs"]
-    )
+    # ── Structured data (JSON-LD @graph): Breadcrumb + Product + FAQ ─────────
+    page_url = f"{SITE}/{slug}.html"
+    img_url = f"{SITE}/assets/{img}"
+
+    faq_questions = [
+        {
+            "@type": "Question",
+            "name": q,
+            "acceptedAnswer": {"@type": "Answer", "text": strip_tags(a)},
+        }
+        for q, a in p["faqs"]
+    ]
+
+    product_node = {
+        "@type": "Product",
+        "@id": f"{page_url}#product",
+        "name": f"Custom {name}",
+        "description": p["desc"],
+        "image": img_url,
+        "url": page_url,
+        "category": "Window coverings",
+        "brand": {"@type": "Brand", "name": BRAND_NAME},
+        "manufacturer": {"@id": ORG_ID},
+        "areaServed": "Greater Toronto Area",
+    }
+    if GOOGLE_REVIEW_COUNT:
+        product_node["aggregateRating"] = {
+            "@type": "AggregateRating",
+            "ratingValue": GOOGLE_REVIEW_RATING,
+            "reviewCount": GOOGLE_REVIEW_COUNT,
+            "bestRating": "5",
+            "worstRating": "1",
+        }
+    if p.get("price"):
+        lo, hi = p["price"]
+        product_node["offers"] = {
+            "@type": "AggregateOffer",
+            "priceCurrency": "CAD",
+            "lowPrice": str(lo),
+            "highPrice": str(hi),
+            "offerCount": "1",
+            "availability": "https://schema.org/InStock",
+            "priceValidUntil": PRICE_VALID_UNTIL,
+            "url": page_url,
+            "seller": {"@id": ORG_ID},
+        }
+    else:
+        product_node["offers"] = {
+            "@type": "Offer",
+            "priceCurrency": "CAD",
+            "availability": "https://schema.org/InStock",
+            "url": page_url,
+            "seller": {"@id": ORG_ID},
+            "description": p.get("price_note", "Quoted per project after a free consultation."),
+        }
+
+    graph = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": ORG_ID,
+                "name": BRAND_NAME,
+                "url": f"{SITE}/",
+                "logo": f"{SITE}/assets/logo.png",
+                "telephone": f"+1-{PHONE}",
+                "sameAs": SAME_AS,
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
+                    {"@type": "ListItem", "position": 2, "name": "Products", "item": f"{SITE}/#products"},
+                    {"@type": "ListItem", "position": 3, "name": name, "item": page_url},
+                ],
+            },
+            product_node,
+            {
+                "@type": "FAQPage",
+                "@id": f"{page_url}#faq",
+                "mainEntity": faq_questions,
+            },
+        ],
+    }
+    ld_json = json_str(graph)
 
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -731,9 +832,18 @@ def render(slug, p):
 <link rel="canonical" href="https://www.modernhomeblinds.ca/{slug}.html"/>
 <meta property="og:site_name" content="Modern Home Blinds"/>
 <meta property="og:locale" content="en_CA"/>
-<meta property="og:image" content="https://www.modernhomeblinds.ca/assets/og-image.jpg"/>
+<meta property="og:image" content="https://www.modernhomeblinds.ca/assets/{img}"/>
+<meta property="og:image:alt" content="Custom {name} by Modern Home Blinds in a GTA home"/>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://www.modernhomeblinds.ca/assets/og-image.jpg"/>
+<meta name="twitter:title" content="{name} | Modern Home Blinds"/>
+<meta name="twitter:description" content="{p["desc"]}"/>
+<meta name="twitter:image" content="https://www.modernhomeblinds.ca/assets/{img}"/>
+<meta name="author" content="Modern Home Blinds"/>
+<meta name="geo.region" content="CA-ON"/>
+<meta name="geo.placename" content="Oakville, Ontario"/>
+<meta name="geo.position" content="43.4097;-79.7124"/>
+<meta name="ICBM" content="43.4097, -79.7124"/>
+<link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt"/>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 <link rel="icon" href="/assets/logo.png" sizes="any"/>
 <link rel="apple-touch-icon" href="/assets/logo.png"/>
@@ -743,7 +853,7 @@ def render(slug, p):
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="assets/product.css"/>
 <script type="application/ld+json">
-{{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{faq_ld}]}}
+{ld_json}
 </script>
 </head>
 <body>
