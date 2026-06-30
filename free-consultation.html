@@ -50,7 +50,11 @@
 .lp-hero-overlay{position:absolute;inset:0;
   background:linear-gradient(115deg,rgba(15,15,15,.92) 0%,rgba(15,15,15,.78) 45%,rgba(15,15,15,.55) 100%)}
 .lp-hero-inner{position:relative;z-index:2;max-width:1180px;margin:0 auto;
-  padding:56px 24px;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+  padding:56px 24px;display:grid;grid-template-columns:1.05fr .95fr;gap:20px 48px;
+  align-items:center;grid-template-areas:"copy form" "proof form"}
+.lp-hero-copy{grid-area:copy}
+.lp-form-card{grid-area:form}
+.lp-hero-proof{grid-area:proof}
 .lp-pill{display:inline-block;background:rgba(201,168,76,.16);color:var(--gold-l);
   border:1px solid rgba(201,168,76,.4);font-size:11px;font-weight:700;letter-spacing:1.5px;
   text-transform:uppercase;padding:7px 16px;border-radius:999px;margin-bottom:20px}
@@ -104,7 +108,15 @@
 .lp-foot a{color:var(--gold)}
 
 @media(max-width:900px){
-  .lp-hero-inner{grid-template-columns:1fr;gap:34px;padding:40px 22px}
+  /* On mobile, drop the form between the headline and the supporting proof
+     so the lead form lands in the first fold. */
+  .lp-hero-inner{grid-template-columns:1fr;gap:20px;padding:22px 20px;
+    grid-template-areas:"copy" "form" "proof"}
+  .lp-hero h1{font-size:clamp(26px,7vw,34px);margin-bottom:10px}
+  .lp-hero-sub{display:none}
+  .lp-pill{margin-bottom:12px}
+  .lp-hero-proof{margin-top:4px}
+  #youform-embed{height:560px}
   .review-grid{grid-template-columns:1fr}
 }
 </style>
@@ -127,10 +139,14 @@
   <div class="lp-hero-bg"><img src="assets/prod-zebra.jpg" alt="Custom blinds in a GTA home"/></div>
   <div class="lp-hero-overlay"></div>
   <div class="lp-hero-inner">
-    <div>
+    <div class="lp-hero-copy">
       <div class="lp-pill">Custom Blinds, Shades &amp; Shutters</div>
       <h1>Get a Free <em>In-Home Consultation</em> &amp; Quote</h1>
       <p class="lp-hero-sub">Beautiful, made-to-measure window coverings for your home — designed, manufactured in Oakville, and professionally installed across the Greater Toronto Area. No pressure, no obligation.</p>
+    </div>
+
+    <!-- SUPPORTING PROOF (sits below the form on mobile) -->
+    <div class="lp-hero-proof">
       <div class="lp-ticks">
         <div class="lp-tick"><span>&#10003;</span>Free in-home measure &amp; design with an expert</div>
         <div class="lp-tick"><span>&#10003;</span>Hundreds of fabrics, colours &amp; motorized options</div>
