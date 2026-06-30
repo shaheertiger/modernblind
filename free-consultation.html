@@ -89,8 +89,11 @@
 /* Reviews */
 .lp-reviews{background:#fff}
 .review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:38px}
-.review-card{background:var(--off);border-radius:8px;padding:26px;border:1px solid rgba(0,0,0,.05)}
-.review-card .stars{color:var(--gold);letter-spacing:2px;font-size:15px;margin-bottom:12px}
+.review-card{background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.06);
+  box-shadow:0 6px 24px rgba(0,0,0,.08)}
+.review-card .photo{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:var(--off)}
+.review-card .rc-body{padding:18px 22px 24px}
+.review-card .stars{color:var(--gold);letter-spacing:2px;font-size:15px;margin-bottom:10px}
 .review-card p{font-size:14px;color:var(--grey-d);line-height:1.7;margin-bottom:14px}
 .review-card .who{font-size:13px;font-weight:700;color:var(--black)}
 .review-card .who span{display:block;font-weight:500;color:var(--grey);font-size:12px;margin-top:2px}
@@ -200,19 +203,28 @@
     </div>
     <div class="review-grid">
       <div class="review-card">
-        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p>&ldquo;From the free consultation to install, everything was seamless. The zebra blinds completely transformed our living room and the price beat every quote we got.&rdquo;</p>
-        <div class="who">Sarah M.<span>Oakville, ON</span></div>
+        <img class="photo" src="assets/review-1.jpg" alt="Happy Modern Home Blinds customer with new zebra blinds" loading="lazy"/>
+        <div class="rc-body">
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p>&ldquo;They measured, showed me samples right in my living room, and installed everything in 3 days. The zebra blinds look incredible. Best money I spent on this house.&rdquo;</p>
+          <div class="who">Verified Customer<span>Greater Toronto Area</span></div>
+        </div>
       </div>
       <div class="review-card">
-        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p>&ldquo;Booked the free consultation on a whim and so glad I did. Honest advice, gorgeous motorized shades, and they installed in days. Highly recommend.&rdquo;</p>
-        <div class="who">David R.<span>Mississauga, ON</span></div>
+        <img class="photo" src="assets/review-2.jpg" alt="Modern Home Blinds customer with new shades in their new home" loading="lazy"/>
+        <div class="rc-body">
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p>&ldquo;We just moved into our new place and spoke with a few companies, but ended up going with Modern Home Blinds. Wahab was professional and responsive. The process was smooth and the results were great.&rdquo;</p>
+          <div class="who">Verified Customer<span>Greater Toronto Area</span></div>
+        </div>
       </div>
       <div class="review-card">
-        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p>&ldquo;Quality is fantastic and being made right here in Oakville sealed it for us. The team was professional, on time and tidy. Five stars all the way.&rdquo;</p>
-        <div class="who">Jennifer L.<span>Toronto, ON</span></div>
+        <img class="photo" src="assets/review-3.jpg" alt="Two happy Modern Home Blinds customers with new light grey shades" loading="lazy"/>
+        <div class="rc-body">
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p>&ldquo;We went with a simple light grey shade, and it completely elevated our room. They were professional, courteous, and really easy to work with. Great experience overall &mdash; highly recommend!&rdquo;</p>
+          <div class="who">Verified Customer<span>Greater Toronto Area</span></div>
+        </div>
       </div>
     </div>
   </div>
