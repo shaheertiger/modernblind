@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Dealer Quote Calculator</title>
+<!-- Internal dealer tool — not part of site navigation or search results -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/logo.png" sizes="any">
+<link rel="apple-touch-icon" href="/assets/logo.png">
+<meta name="theme-color" content="#1A1613">
+<style>
+  :root{
+    --bg:#F0EADC; --ink:#1A1613; --muted:#6B665E; --line:#D9D1BF;
+    --gold:#C8973E; --green:#2E7D4F; --red:#B84A2E;
+    --card:#fff; --shadow:0 2px 12px rgba(26,22,19,0.06);
+    --radius:12px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:16px 14px 140px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  header .brand{font-weight:800;font-size:18px;letter-spacing:0.5px}
+  header .brand .g{color:var(--gold)}
+  header .sub{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:12px}
+  .row{display:flex;gap:10px;align-items:center}
+  .row + .row{margin-top:10px}
+  label{font-size:11px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;display:block;margin-bottom:5px}
+  input[type=text],input[type=number],select{
+    width:100%;padding:14px 12px;font-size:17px;border:1.5px solid var(--line);
+    border-radius:10px;background:#fff;color:var(--ink);font-family:inherit;
+    -webkit-appearance:none;appearance:none;outline:none;transition:border-color 0.15s
+  }
+  input:focus,select:focus{border-color:var(--gold)}
+  select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number]{-moz-appearance:textfield}
+  .win{position:relative}
+  .win-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .win-num{font-weight:800;font-size:15px;color:var(--ink)}
+  .win-price{font-weight:800;font-size:20px;color:var(--green)}
+  .win-del{background:none;border:none;color:var(--red);font-size:22px;padding:6px 10px;cursor:pointer;line-height:1}
+  .dim-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fabric-row{margin-top:10px}
+  .badge{display:inline-block;font-size:10px;padding:3px 8px;background:var(--bg);color:var(--muted);border-radius:100px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  .add-btn{width:100%;padding:16px;background:var(--ink);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:0.3px;margin-top:6px}
+  .add-btn:active{transform:scale(0.98)}
+  .totals{background:var(--ink);color:#fff;padding:18px 16px;border-radius:var(--radius)}
+  .totals .lbl{font-size:11px;letter-spacing:2px;color:#A6A099;text-transform:uppercase;font-weight:600}
+  .totals .amount{font-size:36px;font-weight:800;letter-spacing:-0.5px;margin-top:2px;color:var(--gold)}
+  .totals .count{font-size:12px;color:#A6A099;margin-top:4px}
+  .action-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(240,234,220,0.96);backdrop-filter:blur(10px);padding:12px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:8px;z-index:50}
+  .action-bar .btn{flex:1;padding:14px 8px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.3px}
+  .btn-primary{background:var(--gold);color:var(--ink)}
+  .btn-secondary{background:#fff;color:var(--ink);border:1.5px solid var(--line)!important}
+  .btn-danger{background:#fff;color:var(--red);border:1.5px solid var(--line)!important}
+  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+  .empty h3{margin:0 0 6px;font-size:16px;color:var(--ink)}
+  .empty p{margin:0;font-size:14px}
+  .err{color:var(--red);font-size:12px;margin-top:4px;display:none}
+  .err.show{display:block}
+  input.invalid{border-color:var(--red)}
+  /* Header brand card */
+  .brand-card{background:var(--ink);color:#fff;border-radius:var(--radius);padding:14px 16px;margin-bottom:12px}
+  .brand-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .brand-card .title{font-weight:800;font-size:16px;letter-spacing:0.5px}
+  .brand-card .title .g{color:var(--gold)}
+  .brand-card input{background:rgba(255,255,255,0.08);color:#fff;border:1.5px solid rgba(255,255,255,0.15);padding:10px 12px;font-size:14px}
+  .brand-card input:focus{border-color:var(--gold)}
+  .brand-card input::placeholder{color:rgba(255,255,255,0.4)}
+  .brand-card label{color:rgba(255,255,255,0.55)}
+  .brand-card .settings-btn{background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;letter-spacing:1px}
+  /* Open Roll toggle */
+  .toggle-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .toggle-card .lbl{font-weight:700;font-size:14px;color:var(--ink);line-height:1.25}
+  .toggle-card .sub{font-size:11px;color:var(--muted);letter-spacing:0.5px;margin-top:2px}
+  .switch{position:relative;width:52px;height:30px;flex-shrink:0;cursor:pointer}
+  .switch input{opacity:0;width:0;height:0}
+  .switch .slider{position:absolute;inset:0;background:#D9D1BF;border-radius:100px;transition:background 0.2s}
+  .switch .slider::before{content:'';position:absolute;height:24px;width:24px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.2s;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+  .switch input:checked + .slider{background:var(--gold)}
+  .switch input:checked + .slider::before{transform:translateX(22px)}
+  .toggle-card.on{border-left:4px solid var(--gold);padding-left:10px}
+  /* Modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;align-items:flex-end}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;width:100%;max-width:720px;margin:0 auto;border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto}
+  .modal h3{margin:0 0 14px}
+  .modal .close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:26px;cursor:pointer;color:var(--muted)}
+  /* Print styles */
+  @media print{
+    body{background:#fff}
+    .wrap{padding:0;max-width:100%}
+    .action-bar,.add-btn,.win-del,.brand-card .settings-btn,.no-print{display:none!important}
+    .card,.totals{box-shadow:none;border:1px solid #ddd;page-break-inside:avoid}
+    .brand-card{background:#fff;color:#000;border:2px solid #000}
+    .brand-card input{background:#fff;color:#000;border:none;padding:0}
+    .brand-card label{color:#666}
+    .totals{background:#f4f0e6;color:#000}
+    .totals .lbl,.totals .count{color:#666}
+    .totals .amount{color:#000}
+    .win-price{color:#000}
+    select{background-image:none;padding-right:12px;border:none;padding:0;font-weight:600}
+    input[type=number]{border:none;padding:0;font-weight:600}
+    .win-hdr{border-bottom:1px solid #ddd;padding-bottom:6px}
+    header{display:none}
+    .print-only{display:block!important}
+    .print-header{display:block;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #000}
+    .print-header h1{margin:0;font-size:22px}
+    .print-header .meta{font-size:12px;color:#666;margin-top:4px}
+  }
+  .print-only{display:none}
+  @media (min-width:600px){
+    header .brand{font-size:20px}
+    .win-price{font-size:22px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="print-only print-header">
+    <h1 id="printBiz">Quote</h1>
+    <div class="meta"><span id="printClient"></span> · <span id="printDate"></span></div>
+  </div>
+
+  <header class="no-print">
+    <div>
+      <div class="brand">DEALER <span class="g">QUOTE</span> TOOL</div>
+      <div class="sub">Instant Pricing</div>
+    </div>
+    <button class="settings-btn no-print" onclick="openSettings()" style="background:none;border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--ink);cursor:pointer">⚙ SETUP</button>
+  </header>
+
+  <div class="brand-card no-print">
+    <div class="top">
+      <div class="title"><span id="bizName">Your Business</span></div>
+    </div>
+    <div class="row">
+      <div style="flex:1">
+        <label>Client / Project</label>
+        <input type="text" id="clientName" placeholder="e.g. Smith - Vaughan" oninput="saveClient()">
+      </div>
+    </div>
+  </div>
+
+  <div class="toggle-card no-print" id="openRollCard">
+    <div>
+      <div class="lbl">Open Roll Roller Shades</div>
+      <div class="sub">Removes cassette. Use only for roller shades.</div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="openRollToggle" onchange="toggleOpenRoll(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div id="windowList"></div>
+
+  <button class="add-btn" onclick="addWindow()">+ ADD WINDOW</button>
+
+  <div class="totals" style="margin-top:14px">
+    <div class="lbl">Total Quote</div>
+    <div class="amount" id="grandTotal">$0.00</div>
+    <div class="count" id="winCount">0 windows</div>
+  </div>
+</div>
+
+<div class="action-bar no-print">
+  <button class="btn btn-secondary" onclick="copyQuote()">📋 COPY</button>
+  <button class="btn btn-primary" onclick="window.print()">🖨 PRINT / PDF</button>
+  <button class="btn btn-danger" onclick="resetAll()">✕ RESET</button>
+</div>
+
+<!-- Settings modal -->
+<div class="modal-bg" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <button class="close" onclick="closeSettings()">×</button>
+    <h3>Setup</h3>
+    <div style="margin-bottom:14px">
+      <label>Business Name (shown on quotes)</label>
+      <input type="text" id="setBiz" placeholder="e.g. Modern Home Blinds">
+    </div>
+    <button class="add-btn" onclick="saveSettings()">SAVE</button>
+    <p style="font-size:12px;color:var(--muted);margin-top:14px;text-align:center">Values save on this device. Add to Home Screen for offline access.</p>
+  </div>
+</div>
+
+<script>
+/* =========================================
+   PRIVATE PRICING CONFIG — NOT SHOWN TO DEALER
+   Margin locked at 40%. Labor tiers by width.
+   Hardware/waste match the previous internal calculator.
+   ========================================= */
+const MARGIN = 0.42;                  // 42% margin
+const SELL_MULT = 1 / (1 - MARGIN);
+
+// Hardware cost per LINEAR FOOT of width
+const CASSETTE_PER_FT = 1.19;
+const RAIL_PER_FT     = 1.30;
+const TUBE_PER_FT     = 1.00;
+const MECH_FLAT       = 5.50;   // mechanism + chain, flat per blind
+const WASTE_PCT       = 0.10;   // 10% waste on materials
+
+function laborCost(widthInches){
+  if(widthInches <= 40) return 20.00;
+  if(widthInches <= 70) return 27.50;
+  return 35.00;
+}
+
+// Fabric costs per sqm (dealer never sees these numbers)
+const FABRICS = [
+  {group:"Sheer / Screen Shades", items:[
+    ["Toka 1 (Openness 1%)", 8.00],
+    ["Toka 3 (Openness 3%)", 7.57],
+    ["Toka 5 (Openness 5%)", 7.16],
+    ["Toka 10 (Openness 10%)", 6.70],
+    ["Toka Metalized", 14.61],
+    ["Toka Blackout", 13.96],
+    ["Kato 41 (Openness 1%)", 8.85],
+    ["Kato 43 (Openness 3%)", 8.36],
+    ["Kato 45 (Openness 5%)", 7.92],
+    ["VKEY 1N (Openness 1%)", 6.16],
+    ["VKEY 3N (Openness 3%)", 5.44],
+    ["VKEY 5 (Openness 5%)", 4.84],
+    ["V-Key Blackout", 9.44],
+    ["Piuma 1N (Openness 1%)", 6.05],
+    ["Piuma 3N (Openness 3%)", 5.87],
+    ["Piuma 5 (Openness 5%)", 4.64],
+    ["Condo 1 (Openness 1%)", 10.84],
+    ["Duplex Bi-Directional (Openness 1%)", 11.61],
+    ["MicroScreen (Openness 3%)", 11.16],
+    ["Monza (Openness 3%)", 9.68],
+    ["Belle (Openness 5%)", 5.98],
+    ["Nice (Openness 5%)", 10.63],
+    ["Sierra (Openness 5%)", 9.84],
+    ["Taha (Openness 5%)", 11.16],
+    ["Fancy (Openness 3%)", 9.84],
+    ["Jazz (Openness 10%)", 8.18],
+  ]},
+  {group:"TWC BO", items:[
+    ["Shanel Plus Blackout", 7.50],
+    ["Pearl Blackout", 6.83],
+    ["Linen Blackout", 5.48],
+    ["Linen Plus Blackout", 6.41],
+    ["Omega Blackout", 5.76],
+    ["Cleo Blackout 98\"", 6.68],
+    ["Cleo Blackout 118\"", 6.64],
+    ["Soji Blackout 98\"", 5.62],
+    ["Soji Blackout 118\"", 5.62],
+    ["Soji Blackout tone-to-tone", 5.62],
+    ["Boca Blackout", 7.97],
+    ["Ella Blackout", 10.86],
+    ["Mila Blackout", 10.86],
+    ["Zara Blackout", 10.86],
+    ["Omega Blackout F.R.", 8.93],
+    ["Soji Blackout F.R.", 7.35],
+    ["Soji Blackout tone-to-tone F.R.", 7.35],
+    ["Soji Dimout F.R.", 5.21],
+  ]},
+  {group:"TWC LF", items:[
+    ["Shanel Plus (LF)", 4.55],
+    ["Linen (LF) 98\"", 3.76],
+    ["Soji Dimout 98\"", 3.31],
+    ["Soji Dimout 118\"", 3.31],
+    ["Boca LF", 4.72],
+    ["Chic", 5.07],
+    ["Ella Light Filtering", 7.52],
+    ["Mila Light Filtering", 7.52],
+    ["Zara Light Filtering", 7.52],
+  ]},
+  {group:"Zebra Shades", items:[
+    ["Aquatic (Zebra)", 6.54],
+    ["Aquatic XL (Zebra)", 6.73],
+    ["Gloria Blackout (Zebra)", 13.39],
+    ["Hayes Blackout (Zebra)", 10.38],
+    ["Leslie Blackout (Zebra)", 12.13],
+    ["Ocean (Zebra)", 6.54],
+    ["Rayman (Zebra)", 11.19],
+    ["Roger Blackout (Zebra)", 11.43],
+    ["Sage Blackout (Zebra)", 10.57],
+    ["Arrow (Zebra)", 7.66],
+    ["Jade Semi Blackout (Zebra)", 8.39],
+    ["Vista Blackout (Zebra)", 12.33],
+    ["Snow L/F 3\" (Zebra)", 5.77],
+    ["Snow L/F 4\" (Zebra)", 6.54],
+    ["Star L/F 3\" (Zebra)", 6.93],
+    ["Lana L/F 3\"/4\" (Zebra)", 7.66],
+    ["Texture B/O 3.5\" (Zebra)", 11.31],
+    ["Plain L/F 3\" (Zebra)", 6.71],
+    ["Plain B/O 3\" (Zebra)", 10.22],
+    ["Cloud B/O 3\"/4\" (Zebra)", 10.95],
+    ["Wood L/F 3\" (Zebra)", 12.04],
+    ["Echo L/F 3\" (Zebra)", 12.04],
+    ["Flora B/O 3\"/4\" (Zebra)", 10.95],
+    ["Platinum B/O 4\" (Zebra)", 12.04],
+    ["Polar L/F 4\" (Zebra)", 7.30],
+    ["Polar B/O 4\" (Zebra)", 10.22],
+  ]},
+  {group:"Roller Shades", items:[
+    ["Nella (Roller)", 7.77],
+    ["Brick (Roller)", 7.69],
+    ["Niagara (Roller)", 7.50],
+    ["Crystal (Roller)", 4.81],
+    ["Nova (Roller)", 4.90],
+    ["Paris (Roller)", 4.83],
+    ["Linen (Roller)", 5.05],
+    ["Nella Blackout (Roller)", 11.13],
+    ["Brick Blackout (Roller)", 11.13],
+    ["Niagara Blackout (Roller)", 10.86],
+    ["Paris Blackout (Roller)", 7.02],
+    ["Linen Blackout (Roller)", 7.14],
+    ["Starry (Roller)", 8.09],
+    ["Fusion (Roller)", 7.87],
+    ["Cloud (Roller)", 7.91],
+    ["Privacy L/F (Roller)", 4.01],
+    ["Candy L/F (Roller)", 3.51],
+    ["Candy B/O 118\" (Roller)", 4.56],
+    ["Candy B/O 98\" (Roller)", 4.61],
+    ["Snow L/F (Roller)", 4.81],
+    ["Sunscreen 1% (Roller)", 6.02],
+    ["Sunscreen 3% (Roller)", 5.66],
+    ["Sunscreen 5% (Roller)", 5.47],
+    ["Sunscreen B/O-Top (Roller)", 9.49],
+    ["Lima L/F (Roller)", 4.74],
+    ["Lima B/O (Roller)", 7.66],
+    ["Bamboo L/F (Roller)", 4.38],
+    ["Bamboo B/O (Roller)", 6.93],
+    ["Linen L/F 118\" (Roller)", 4.56],
+    ["Linen L/F 98\" (Roller)", 4.83],
+    ["Linen B/O 118\" (Roller)", 6.20],
+    ["Linen B/O 98\" (Roller)", 6.37],
+    ["Prime B/O (Roller)", 6.20],
+    ["Gila L/F (Roller)", 5.11],
+    ["Gila B/O (Roller)", 7.66],
+    ["Navy L/F (Roller)", 4.93],
+    ["Navy B/O (Roller)", 7.84],
+    ["Etude B/O (Roller)", 8.03],
+    ["Nature L/F (Roller)", 9.85],
+    ["Denison L/F 118\" (Roller)", 4.74],
+    ["Denison L/F 102\" (Roller)", 5.07],
+    ["Denison B/O 118\" (Roller)", 6.20],
+    ["Denison B/O 102\" (Roller)", 5.91],
+  ]},
+];
+
+// Flatten lookup: fabric name -> cost per sqm
+const FABRIC_COST = {};
+FABRICS.forEach(g => g.items.forEach(([name,cost]) => FABRIC_COST[name] = cost));
+const ALL_FABRIC_NAMES = Object.keys(FABRIC_COST);
+
+/* =========================================
+   STATE
+   ========================================= */
+let state = {
+  bizName: "",
+  clientName: "",
+  windows: [],           // {id, w, h, fabric}
+  currentDefault: ALL_FABRIC_NAMES[0],
+  openRoll: false,       // when true, cassette skipped on roller-shade windows
+  nextId: 1
+};
+
+function load(){
+  try{
+    const s = localStorage.getItem('dealerCalc_v1');
+    if(s){
+      const p = JSON.parse(s);
+      state = Object.assign(state, p);
+    }
+  }catch(e){}
+}
+function save(){
+  localStorage.setItem('dealerCalc_v1', JSON.stringify(state));
+}
+
+/* =========================================
+   PRICING (dealer never sees breakdown)
+   ========================================= */
+const SQM_PER_SQIN = 0.00064516;  // (0.0254m)^2
+
+function windowSellPrice(w){
+  const width = parseFloat(w.w) || 0;
+  const height = parseFloat(w.h) || 0;
+  if(width <= 0 || height <= 0) return 0;
+
+  const widthFt = width / 12;
+
+  // Hardware — cassette skipped if Open Roll toggle is on (dealer's judgment)
+  const cassette = state.openRoll ? 0 : (CASSETTE_PER_FT * widthFt);
+  const rail     = RAIL_PER_FT * widthFt;
+  const tube     = TUBE_PER_FT * widthFt;
+  const mech     = MECH_FLAT;
+  const hardware = cassette + rail + tube + mech;
+
+  // Fabric
+  const sqm = width * height * SQM_PER_SQIN;
+  const fabricCost = sqm * (FABRIC_COST[w.fabric] || 0);
+
+  // Materials + waste + labor
+  const material = hardware + fabricCost;
+  const waste = material * WASTE_PCT;
+  const labor = laborCost(width) - (state.openRoll ? 5 : 0);
+  const cost = material + waste + labor;
+
+  const sell = cost * SELL_MULT;
+  return Math.round(sell);
+}
+
+function money(n){
+  return "$" + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function moneyRound(n){
+  return "$" + Math.round(n).toLocaleString('en-US');
+}
+
+/* =========================================
+   RENDER
+   ========================================= */
+function buildFabricSelect(currentValue){
+  let html = '';
+  FABRICS.forEach(g => {
+    html += `<optgroup label="${g.group}">`;
+    g.items.forEach(([name]) => {
+      const sel = name === currentValue ? ' selected' : '';
+      html += `<option value="${escapeAttr(name)}"${sel}>${escapeHtml(name)}</option>`;
+    });
+    html += `</optgroup>`;
+  });
+  return html;
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function escapeAttr(s){return escapeHtml(s)}
+
+function renderAll(){
+  const list = document.getElementById('windowList');
+  if(state.windows.length === 0){
+    list.innerHTML = `<div class="card empty">
+      <h3>No windows yet</h3>
+      <p>Tap "+ Add Window" to start your quote.</p>
+    </div>`;
+  } else {
+    list.innerHTML = state.windows.map((w, i) => renderWindow(w, i)).join('');
+  }
+  renderTotals();
+  syncBrand();
+}
+
+function renderWindow(w, i){
+  const price = windowSellPrice(w);
+  return `<div class="card win" data-id="${w.id}">
+    <div class="win-hdr">
+      <div class="win-num">Window ${i+1}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="win-price" data-price>${price ? moneyRound(price) : '—'}</div>
+        <button class="win-del no-print" onclick="removeWindow(${w.id})" aria-label="Remove">✕</button>
+      </div>
+    </div>
+    <div class="dim-row">
+      <div>
+        <label>Width (in)</label>
+        <input type="number" inputmode="decimal" step="0.125" min="6" max="144"
+          value="${w.w || ''}" placeholder="e.g. 36"
+          oninput="updateDim(${w.id},'w',this.value,this)">
+      </div>
+      <div>
+        <label>Height (in)</label>
+        <input type="number" inputmode="decimal" step="0.125" min="6" max="144"
+          value="${w.h || ''}" placeholder="e.g. 60"
+          oninput="updateDim(${w.id},'h',this.value,this)">
+      </div>
+    </div>
+    <div class="fabric-row">
+      <label>Fabric</label>
+      <select onchange="updateFabric(${w.id},this.value)">
+        ${buildFabricSelect(w.fabric)}
+      </select>
+    </div>
+  </div>`;
+}
+
+function renderTotals(){
+  let total = 0;
+  state.windows.forEach(w => total += windowSellPrice(w));
+  document.getElementById('grandTotal').textContent = moneyRound(total);
+  document.getElementById('winCount').textContent =
+    state.windows.length + (state.windows.length === 1 ? ' window' : ' windows');
+}
+
+function syncBrand(){
+  const name = state.bizName || "Your Business";
+  document.getElementById('bizName').textContent = name;
+  document.getElementById('printBiz').textContent = state.bizName || "Quote";
+  document.getElementById('printClient').textContent = state.clientName || "";
+  document.getElementById('printDate').textContent = new Date().toLocaleDateString();
+  document.getElementById('clientName').value = state.clientName || "";
+}
+
+/* =========================================
+   HANDLERS (do NOT re-render on typing — just update the price)
+   ========================================= */
+function updateDim(id, key, val, inputEl){
+  const w = state.windows.find(x => x.id === id);
+  if(!w) return;
+  w[key] = val;
+  save();
+  // Only update this window's price + totals; DO NOT rebuild inputs
+  const card = inputEl.closest('.win');
+  const priceEl = card.querySelector('[data-price]');
+  const p = windowSellPrice(w);
+  priceEl.textContent = p ? moneyRound(p) : '—';
+  renderTotals();
+}
+
+function updateFabric(id, val){
+  const w = state.windows.find(x => x.id === id);
+  if(!w) return;
+  w.fabric = val;
+  // Update the "default for new windows" to whatever they just picked
+  state.currentDefault = val;
+  save();
+  const card = document.querySelector(`.win[data-id="${id}"]`);
+  const priceEl = card.querySelector('[data-price]');
+  const p = windowSellPrice(w);
+  priceEl.textContent = p ? moneyRound(p) : '—';
+  renderTotals();
+}
+
+function addWindow(){
+  state.windows.push({
+    id: state.nextId++,
+    w: '',
+    h: '',
+    fabric: state.currentDefault
+  });
+  save();
+  renderAll();
+  // Focus the new width input for fast entry
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.win');
+    const last = cards[cards.length - 1];
+    if(last){
+      last.scrollIntoView({behavior:'smooth', block:'center'});
+      const inp = last.querySelector('input[type=number]');
+      if(inp) inp.focus();
+    }
+  }, 50);
+}
+
+function removeWindow(id){
+  if(!confirm('Remove this window?')) return;
+  state.windows = state.windows.filter(x => x.id !== id);
+  save();
+  renderAll();
+}
+
+function toggleOpenRoll(on){
+  state.openRoll = !!on;
+  save();
+  document.getElementById('openRollCard').classList.toggle('on', state.openRoll);
+  renderAll();
+}
+
+function saveClient(){
+  state.clientName = document.getElementById('clientName').value;
+  save();
+  document.getElementById('printClient').textContent = state.clientName || "";
+}
+
+/* =========================================
+   SETTINGS MODAL
+   ========================================= */
+function openSettings(){
+  document.getElementById('setBiz').value = state.bizName || '';
+  document.getElementById('settingsModal').classList.add('show');
+}
+function closeSettings(){
+  document.getElementById('settingsModal').classList.remove('show');
+}
+function saveSettings(){
+  state.bizName = document.getElementById('setBiz').value.trim();
+  save();
+  syncBrand();
+  closeSettings();
+}
+
+/* =========================================
+   COPY / RESET
+   ========================================= */
+function copyQuote(){
+  const lines = [];
+  if(state.bizName) lines.push(state.bizName);
+  lines.push('QUOTE — ' + new Date().toLocaleDateString());
+  if(state.clientName) lines.push('Client: ' + state.clientName);
+  lines.push('=====================================');
+  let total = 0;
+  state.windows.forEach((w, i) => {
+    const p = windowSellPrice(w);
+    total += p;
+    lines.push(`Window ${i+1}: ${w.w || '?'}" × ${w.h || '?'}"  |  ${w.fabric}  →  ${moneyRound(p)}`);
+  });
+  lines.push('=====================================');
+  lines.push(`TOTAL: ${moneyRound(total)}`);
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Quote copied to clipboard.');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); alert('Quote copied.'); }catch(e){ alert('Copy failed. Text:\n\n'+text); }
+    document.body.removeChild(ta);
+  });
+}
+
+function resetAll(){
+  if(!confirm('Reset all windows and client info? Your business name is kept.')) return;
+  state.windows = [];
+  state.clientName = '';
+  state.nextId = 1;
+  state.currentDefault = ALL_FABRIC_NAMES[0];
+  save();
+  renderAll();
+}
+
+/* =========================================
+   INIT
+   ========================================= */
+load();
+document.getElementById('openRollToggle').checked = !!state.openRoll;
+document.getElementById('openRollCard').classList.toggle('on', !!state.openRoll);
+renderAll();
+</script>
+</body>
+</html>
