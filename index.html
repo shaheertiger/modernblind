@@ -1350,6 +1350,25 @@ function sendLead(payload){
   })
 }
 
+// ── CONVERSION TRACKING ───────────────────────────────────────
+// Pushes the GTM custom event that the Google Ads conversion tag listens for
+// (trigger: Custom Event "generate_lead"). Called only once a lead has really
+// been captured — never on click — so the Ads count matches the inbox.
+// user_data feeds enhanced conversions; Google wants E.164 phone numbers.
+function e164(t){
+  var d=(t||'').replace(/\D/g,'')
+  if(d.length===10)return '+1'+d
+  if(d.length===11&&d.charAt(0)==='1')return '+'+d
+  return d?'+'+d:''
+}
+function pushLead(formName,em,ph){
+  var ud={}
+  if(em&&em.trim())ud.email_address=em.trim().toLowerCase()
+  if(e164(ph))ud.phone_number=e164(ph)
+  window.dataLayer=window.dataLayer||[]
+  window.dataLayer.push({event:'generate_lead',form_name:formName,user_data:ud})
+}
+
 // ── CONSULTATION FORM ─────────────────────────────────────────────────────
 function submitConsult(){
   var fn=document.getElementById('cf-fn').value.trim()
@@ -1393,6 +1412,7 @@ function submitConsult(){
   }
 
   function done(){
+    pushLead('Hero consultation form',em,ph)
     document.getElementById('consultForm').style.display='none'
     document.getElementById('cf-success').style.display='block'
   }
@@ -1408,6 +1428,7 @@ function submitCF(e){
     if(el.name)payload[el.name]=el.value.trim()||'(not provided)'
   })
   function done(){
+    pushLead('Contact section form',f.querySelector('[name=Email]').value,f.querySelector('[name=Phone]').value)
     f.querySelectorAll('input,textarea,button[type=submit]').forEach(function(el){el.style.display='none'})
     document.getElementById('cSuccess').style.display='block'
   }
@@ -1469,6 +1490,7 @@ async function qSubmit(){
     Estimated_Range:'$'+r.low.toLocaleString()+' – $'+r.high.toLocaleString(),
     Source:'Estimate quiz'
   }).catch(function(){})
+  pushLead('Estimate quiz',em,ph)
 
   // Generate the personalised quote PDF and download it
   try{
