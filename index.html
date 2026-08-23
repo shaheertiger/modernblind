@@ -1354,7 +1354,8 @@ function sendLead(payload){
 // Pushes the GTM custom event that the Google Ads conversion tag listens for
 // (trigger: Custom Event "generate_lead"). Called only once a lead has really
 // been captured — never on click — so the Ads count matches the inbox.
-// user_data feeds enhanced conversions; Google wants E.164 phone numbers.
+// user_data feeds enhanced conversions. Google's unhashed keys are exactly
+// "email" and "phone_number"; it wants email lowercased and phone in E.164.
 function e164(t){
   var d=(t||'').replace(/\D/g,'')
   if(d.length===10)return '+1'+d
@@ -1363,7 +1364,7 @@ function e164(t){
 }
 function pushLead(formName,em,ph){
   var ud={}
-  if(em&&em.trim())ud.email_address=em.trim().toLowerCase()
+  if(em&&em.trim())ud.email=em.trim().toLowerCase()
   if(e164(ph))ud.phone_number=e164(ph)
   window.dataLayer=window.dataLayer||[]
   window.dataLayer.push({event:'generate_lead',form_name:formName,user_data:ud})
