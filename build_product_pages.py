@@ -721,6 +721,13 @@ def render(slug, p):
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){{w[l]=w[l]||[];w[l].push({{'gtm.start':
+new Date().getTime(),event:'gtm.js'}});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+}})(window,document,'script','dataLayer','GTM-MQTMK5PM');</script>
+<!-- End Google Tag Manager -->
 <title>{p["title"]}</title>
 <meta name="description" content="{p["desc"]}"/>
 <meta property="og:title" content="{name} | Modern Home Blinds"/>
@@ -764,6 +771,10 @@ def render(slug, p):
 <!-- End Nextdoor Pixel Code -->
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MQTMK5PM"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <!-- ANNOUNCEMENT BAR -->
 <div class="ann">Free In-Home Consultation <b>&middot;</b> Manufactured in Oakville <b>&middot;</b> Installed in Under 1 Week</div>
